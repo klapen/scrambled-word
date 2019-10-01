@@ -1,0 +1,11 @@
+{
+  "name": "scrambled-word-backend",
+  "version": "0.0.1",
+  "description": "Endpoint to provide english words with pronunciation ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Orlando Saavedra <osaaavedrac@gmail.com>",
+  "license": "MIT"
+}
