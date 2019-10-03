@@ -4,11 +4,24 @@ const apiKey = "TBJHATNG";
 const url = `https://random-word-api.herokuapp.com/word?key=${apiKey}&number=5`;
 
 function tilesObject(word){
-    return word
-        .toUpperCase()
-        .split('').map( (c,i) => {
-            return {id: i , letter: c, x: i, y:1 }
-        });
+    const chars = word.toUpperCase().split('')
+          .map( (c,i) => {
+              return {id: i , letter: c }
+          });;
+    let currentIndex = chars.length, temporaryValue, randomIndex;
+
+    while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        temporaryValue = chars[currentIndex];
+        chars[currentIndex] = chars[randomIndex];
+        chars[randomIndex] = temporaryValue;
+    }
+
+    return chars.map( (c,i) => {
+        return {id: c.id , letter: c.letter, x: i, y:1 }
+    });
 }
 
 class ApiService {
