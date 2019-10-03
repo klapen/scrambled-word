@@ -6,182 +6,221 @@ import PropTypes            from 'proptypes';
 import classNames           from 'classnames';
 import HTML5Backend         from 'react-dnd-html5-backend';
 import {
-  DragSource,
-  DropTarget,
-  DragDropContext
+    DragSource,
+    DropTarget,
+    DragDropContext
 }                           from 'react-dnd';
 
 import FlipMove             from 'react-flip-move';
 import Toggle               from './Toggle.jsx';
-import tiles                from '../data/tiles.js';
+import ApiService           from '../../services/ApiService';
+
+const INITIAL_TILES = [
+    { id: 1, letter: '*', x: 0, y: 1 },
+    { id: 1, letter: '*', x: 1, y: 1 },
+    { id: 2, letter: '*', x: 2, y: 1 },
+    { id: 3, letter: '*', x: 3, y: 1 },
+    { id: 4, letter: '*', x: 4, y: 1 },
+    { id: 5, letter: '*', x: 5, y: 1 },
+    { id: 6, letter: '*', x: 6, y: 1 },
+    { id: 7, letter: '*', x: 7, y: 1 },
+    { id: 8, letter: '*', x: 8, y: 1 },
+    { id: 9, letter: '*', x: 9, y: 1 },
+    { id: 10, letter: '*', x: 10, y: 1 }
+];
 
 const BOARD_WIDTH   = 11;
 const BOARD_HEIGHT  = 2;
 const SQUARE_SIZE   = 56;
 const TILE_OFFSET   = 2;
 
+let tiles = [];
+
 @DragDropContext(HTML5Backend)
 class Scrabble extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { tiles };
+    constructor(props) {
+        super(props);
+        this.state = { tiles: INITIAL_TILES };
 
-    this.updateDroppedTilePosition = this.updateDroppedTilePosition.bind(this);
-    this.resetTiles = this.resetTiles.bind(this);
-  }
+        this.updateDroppedTilePosition = this.updateDroppedTilePosition.bind(this);
+        this.resetTiles = this.resetTiles.bind(this);
+        this.newTiles = this.newTiles.bind(this);
+    }
 
-  updateDroppedTilePosition({x, y}, tile) {
-    // Normally, this would be done through a Redux action, but because this
-    // is such a contrived example, I'm just passing the action down through
-    // the child.
+    componentWillMount(){
+        this.newTiles();
+    }
 
-    // Create a copy of the state, find the newly-dropped tile.
-    let stateTiles = this.state.tiles.slice();
-    const index = stateTiles.findIndex( stateTile => stateTile.id === tile.id );
+    updateDroppedTilePosition({x, y}, tile) {
+        // Normally, this would be done through a Redux action, but because this
+        // is such a contrived example, I'm just passing the action down through
+        // the child.
 
-    // Set it to a new copy of the tile, but with the new coords
-    stateTiles[index] = { ...tile, x, y };
+        // Create a copy of the state, find the newly-dropped tile.
+        let stateTiles = this.state.tiles.slice();
+        const index = stateTiles.findIndex( stateTile => stateTile.id === tile.id );
 
-    this.setState({ tiles: stateTiles });
-  }
+        // Set it to a new copy of the tile, but with the new coords
+        stateTiles[index] = { ...tile, x, y };
+        this.setState({ tiles: stateTiles });
+    }
 
-  resetTiles() {
-    this.setState({ tiles });
-  }
+    resetTiles() {
+        this.setState({ tiles });
+    }
 
-  renderTiles() {
-    return this.state.tiles.map( (tile, index) => {
-      return (
-        <Tile
-          key={index}
-          onDrop={this.updateDroppedTilePosition}
-          {...tile}
-        />
-      );
-    });
-  }
+    newTiles(){
+        ApiService.getWord().then( res => {
+            const missing = INITIAL_TILES.slice(res.length);
+            missing.forEach(d => d.hide = true);
+            tiles = res;
+            this.setState({ tiles: res.concat(missing) });
+        }).catch( (ex) =>{
+            console.log(`Error on API: ${ex}`);
+            this.setState({ tiles: INITIAL_TILES });
+        });
+    }
 
-  renderBoardSquares() {
-    // Create a 2D array to represent the board
-    // Array#matrix is a monkeypatched, custom method >:)
-    const matrix = Array.matrix(BOARD_WIDTH, BOARD_HEIGHT);
+    renderTiles() {
+        return this.state.tiles.map( (tile, index) => {
+            return (
+                <Tile
+                  key={index}
+                  onDrop={this.updateDroppedTilePosition}
+                  {...tile}
+                />
+            );
+        });
+    }
 
-    return matrix.map( (row, rowIndex) => (
-      row.map( (index) => {
+    renderBoardSquares() {
+        // Create a 2D array to represent the board
+        // Array#matrix is a monkeypatched, custom method >:)
+        const matrix = Array.matrix(BOARD_WIDTH, BOARD_HEIGHT);
+
+        return matrix.map( (row, rowIndex) => (
+            row.map( (index) => {
+                return (
+                    <BoardSquare
+                      x={index}
+                      y={rowIndex}
+                      onDrop={this.updateDroppedTilePosition}
+                    />
+                );
+            })
+        ));
+    }
+
+    render() {
         return (
-          <BoardSquare
-            x={index}
-            y={rowIndex}
-            onDrop={this.updateDroppedTilePosition}
-          />
+            <div id="scrabble">
+              <div className="board-border">
+                <div className="board">
+                  <FlipMove duration={200} staggerDelayBy={150}>
+                    { this.renderTiles() }
+                  </FlipMove>
+                  { this.renderBoardSquares() }
+                </div>
+              </div>
+
+              <div className="controls">
+                <Toggle
+                  clickHandler={this.resetTiles}
+                  text="Reset" icon="refresh"
+                  active={true}
+                  large={true}
+                />
+                <Toggle
+                  clickHandler={this.newTiles}
+                  text="Next word" icon="next"
+                  active={true}
+                  large={true}
+                />
+              </div>
+            </div>
         );
-      })
-    ));
-  }
-
-  render() {
-    return (
-      <div id="scrabble">
-        <div className="board-border">
-          <div className="board">
-            <FlipMove duration={200} staggerDelayBy={150}>
-              { this.renderTiles() }
-            </FlipMove>
-            { this.renderBoardSquares() }
-          </div>
-        </div>
-
-        <div className="controls">
-          <Toggle
-            clickHandler={this.resetTiles}
-            text="Reset" icon="refresh"
-            active={true}
-            large={true}
-          />
-        </div>
-      </div>
-    );
-  }
+    }
 };
 
 const tileSource = {
-  beginDrag(props) { return props; }
+    beginDrag(props) { return props; }
 };
 
 const tileTarget = {
-  drop(props, monitor) {
-    const tile1 = props;
-    const tile2 = monitor.getItem();
-
-    props.onDrop(tile1, tile2);
-    props.onDrop(tile2, tile1);
-  }
+    drop(props, monitor) {
+        const tile1 = props;
+        const tile2 = monitor.getItem();
+        props.onDrop(tile1, tile2);
+        props.onDrop(tile2, tile1);
+    }
 }
 
 @DropTarget('tile', tileTarget, (connect, monitor) => ({
-  connectDropTarget:  connect.dropTarget(),
-  isOver:             monitor.isOver()
+    connectDropTarget:  connect.dropTarget(),
+    isOver:             monitor.isOver()
 }))
 @DragSource('tile', tileSource, (connect, monitor) => ({
-  connectDragSource:  connect.dragSource(),
-  isDragging:         monitor.isDragging()
+    connectDragSource:  connect.dragSource(),
+    isDragging:         monitor.isDragging()
 }))
 class Tile extends Component {
-  static propTypes = {
-    x:                  PropTypes.number.isRequired,
-    y:                  PropTypes.number.isRequired,
-    letter:             PropTypes.string.isRequired,
-    connectDragSource:  PropTypes.func.isRequired,
-    isDragging:         PropTypes.bool.isRequired
-  };
-
-  render() {
-    const {
-      connectDropTarget, connectDragSource, isDragging, letter, x, y
-    } = this.props;
-
-    const styles = {
-      left:     x * SQUARE_SIZE + TILE_OFFSET/2,
-      top:      y * SQUARE_SIZE,
-      zIndex:   `${x+1}${y+1}`,
-      opacity:  isDragging ? 0.5 : 1
+    static propTypes = {
+        x:                  PropTypes.number.isRequired,
+        y:                  PropTypes.number.isRequired,
+        id:                 PropTypes.number.isRequired,
+        letter:             PropTypes.string.isRequired,
+        connectDragSource:  PropTypes.func.isRequired,
+        isDragging:         PropTypes.bool.isRequired
     };
 
-    return connectDropTarget(connectDragSource(
-      <div className="tile" style={styles}>
-        <span className="tile-letter">{letter}</span>
-      </div>
-    ));
-  }
+    render() {
+        const {
+            connectDropTarget, connectDragSource, isDragging, letter, x, y, hide
+        } = this.props;
+
+        const styles = {
+            left:     x * SQUARE_SIZE + TILE_OFFSET/2,
+            top:      y * SQUARE_SIZE,
+            zIndex:   `${x+1}${y+1}`,
+            opacity:  hide ? 0 : isDragging ? 0.5 : 1,
+            display:  hide ? 'none' : 'block'
+        };
+
+        return connectDropTarget(connectDragSource(
+            <div className="tile" style={styles}>
+              <span className="tile-letter">{letter}</span>
+            </div>
+        ));
+    }
 }
 
 const squareTarget = {
-  drop(props, monitor) {
-    props.onDrop(props, monitor.getItem());
-  }
+    drop(props, monitor) {
+        props.onDrop(props, monitor.getItem());
+    }
 }
 
 @DropTarget('tile', squareTarget, (connect, monitor) => ({
-  connectDropTarget:  connect.dropTarget(),
-  isOver:             monitor.isOver()
+    connectDropTarget:  connect.dropTarget(),
+    isOver:             monitor.isOver()
 }))
 class BoardSquare extends Component {
-  renderSquare() {
-    const classes = classNames({
-      'board-square': true,
-      'dragged-over': this.props.isOver
-    });
+    renderSquare() {
+        const classes = classNames({
+            'board-square': true,
+            'dragged-over': this.props.isOver
+        });
 
-    return <div className={classes}></div>;
-  }
-  render() {
-    if ( this.props.tile ) {
-      // If this square already has a tile in it, we don't want to allow drops.
-      return this.renderSquare();
-    } else {
-      return this.props.connectDropTarget( this.renderSquare() );
+        return <div className={classes}></div>;
     }
-  }
+    render() {
+        if ( this.props.tile ) {
+            // If this square already has a tile in it, we don't want to allow drops.
+            return this.renderSquare();
+        } else {
+            return this.props.connectDropTarget( this.renderSquare() );
+        }
+    }
 }
 
 

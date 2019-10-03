@@ -16,7 +16,8 @@
     "react-dnd-html5-backend": "^2.0.0",
     "react-dom": "^16.10.1",
     "react-flip-move": "^3.0.3",
-    "react-scripts": "3.1.2"
+    "react-scripts": "3.1.2",
+    "request": "^2.88.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
