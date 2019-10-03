@@ -72,16 +72,18 @@ class Scrabble extends Component {
 
     newTiles(){
         this.setState({ tiles: INITIAL_TILES }, () => {
-            ApiService.getWord().then( res => {
-                tiles = res.slice();
-                console.log('respuesta ', res.sort( (a,b) => a.id > b.id));
-                const missing = INITIAL_TILES.slice(res.length);
-                missing.forEach(d => d.hide = true);
-                this.setState({ tiles: res.concat(missing), submit: false, reset: false });
-            }).catch( (ex) =>{
-                console.log(`Error on API: ${ex}`);
-                this.setState({ tiles: INITIAL_TILES, submit: true, reset: true });
-            });
+            setTimeout( () => {
+                ApiService.getWord().then( res => {
+                    tiles = res.slice();
+                    console.log('respuesta ', res.sort( (a,b) => a.id > b.id));
+                    const missing = INITIAL_TILES.slice(res.length);
+                    missing.forEach(d => d.hide = true);
+                    this.setState({ tiles: res.concat(missing), submit: false, reset: false });
+                }).catch( (ex) =>{
+                    console.log(`Error on API: ${ex}`);
+                    this.setState({ tiles: INITIAL_TILES, submit: true, reset: true });
+                });
+            }, 1500);
         });
     }
 
@@ -101,6 +103,8 @@ class Scrabble extends Component {
 
         if(tiles.length === score){
             score = StorageService.addToScore(1);
+        }else{
+            score = StorageService.getScore();
         }
         this.setState({ tiles: stateTiles, submit: true, reset: true, score });
     }

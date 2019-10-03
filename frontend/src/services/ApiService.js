@@ -1,7 +1,6 @@
 import request from 'request';
 
-const apiKey = '7Z5LP05C';
-const url = `https://random-word-api.herokuapp.com/word?key=${apiKey}&number=5`;
+const url = 'http://localhost:3001/api/v1/random-word/';
 
 function tilesObject(word, readable, classname){
     const chars = word.toUpperCase().split('')
@@ -48,8 +47,7 @@ class ApiService {
                 }
                 
                 try{
-                    const words = JSON.parse(body).filter( w => w.length > 4 && w.length < 11);
-                    return accept(tilesObject(words[0]));
+                    return accept(tilesObject(JSON.parse(body).word));
                 }catch (ex){
                     console.log(`ApiService -> Error parsing to JSON: ${body} - ${ex}`);
                     return accept(tilesObject('<sys error>', true, 'tile-wrong'));
