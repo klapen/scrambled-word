@@ -2,17 +2,13 @@ import '../../helpers/arrayHelpers';
 import './Scrabble.scss';
 
 import React, { Component } from 'react';
-import PropTypes            from 'proptypes';
-import classNames           from 'classnames';
 import HTML5Backend         from 'react-dnd-html5-backend';
-import {
-    DragSource,
-    DropTarget,
-    DragDropContext
-}                           from 'react-dnd';
+import { DragDropContext }  from 'react-dnd';
 
 import FlipMove             from 'react-flip-move';
-import Toggle               from './Toggle.jsx';
+import Toggle               from '../Toggle';
+import Tile                 from '../Tile';
+import BoardSquare          from '../BoardSquare';
 import ApiService           from '../../services/ApiService';
 
 const INITIAL_TILES = [
@@ -31,8 +27,6 @@ const INITIAL_TILES = [
 
 const BOARD_WIDTH   = 11;
 const BOARD_HEIGHT  = 2;
-const SQUARE_SIZE   = 56;
-const TILE_OFFSET   = 2;
 
 let tiles = [];
 
@@ -132,7 +126,7 @@ class Scrabble extends Component {
         return (
             <div id="scrabble">
               <div className="board-border">
-                <div className="board">
+                <div key="scrabble-board" className="board">
                   <FlipMove duration={200} staggerDelayBy={150}>
                     { this.renderTiles() }
                   </FlipMove>
@@ -164,90 +158,5 @@ class Scrabble extends Component {
         );
     }
 };
-
-const tileSource = {
-    beginDrag(props) { return props; }
-};
-
-const tileTarget = {
-    drop(props, monitor) {
-        const tile1 = props;
-        const tile2 = monitor.getItem();
-        props.onDrop(tile1, tile2);
-        props.onDrop(tile2, tile1);
-    }
-}
-
-@DropTarget('tile', tileTarget, (connect, monitor) => ({
-    connectDropTarget:  connect.dropTarget(),
-    isOver:             monitor.isOver()
-}))
-@DragSource('tile', tileSource, (connect, monitor) => ({
-    connectDragSource:  connect.dragSource(),
-    isDragging:         monitor.isDragging()
-}))
-class Tile extends Component {
-    static propTypes = {
-        x:                  PropTypes.number.isRequired,
-        y:                  PropTypes.number.isRequired,
-        id:                 PropTypes.number.isRequired,
-        letter:             PropTypes.string.isRequired,
-        connectDragSource:  PropTypes.func.isRequired,
-        isDragging:         PropTypes.bool.isRequired
-    };
-
-    render() {
-        const {
-            connectDropTarget, connectDragSource, isDragging, letter, x, y, hide, classname
-        } = this.props;
-
-        const styles = {
-            left:     x * SQUARE_SIZE + TILE_OFFSET/2,
-            top:      y * SQUARE_SIZE,
-            zIndex:   `${x+1}${y+1}`,
-            opacity:  hide ? 0 : isDragging ? 0.5 : 1,
-            display:  hide ? 'none' : 'block'
-        };
-
-        let tileClassname = 'tile';
-        if(classname) tileClassname += ` ${classname}`;
-
-        return connectDropTarget(connectDragSource(
-            <div className={tileClassname} style={styles}>
-              <span className="tile-letter">{letter}</span>
-            </div>
-        ));
-    }
-}
-
-const squareTarget = {
-    drop(props, monitor) {
-        props.onDrop(props, monitor.getItem());
-    }
-}
-
-@DropTarget('tile', squareTarget, (connect, monitor) => ({
-    connectDropTarget:  connect.dropTarget(),
-    isOver:             monitor.isOver()
-}))
-class BoardSquare extends Component {
-    renderSquare() {
-        const classes = classNames({
-            'board-square': true,
-            'dragged-over': this.props.isOver
-        });
-
-        return <div className={classes}></div>;
-    }
-    render() {
-        if ( this.props.tile ) {
-            // If this square already has a tile in it, we don't want to allow drops.
-            return this.renderSquare();
-        } else {
-            return this.props.connectDropTarget( this.renderSquare() );
-        }
-    }
-}
-
 
 export default Scrabble;
