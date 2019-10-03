@@ -45,6 +45,7 @@ class Scrabble extends Component {
         this.updateDroppedTilePosition = this.updateDroppedTilePosition.bind(this);
         this.resetTiles = this.resetTiles.bind(this);
         this.newTiles = this.newTiles.bind(this);
+        this.submit = this.submit.bind(this);
     }
 
     componentWillMount(){
@@ -70,15 +71,31 @@ class Scrabble extends Component {
     }
 
     newTiles(){
-        ApiService.getWord().then( res => {
-            const missing = INITIAL_TILES.slice(res.length);
-            missing.forEach(d => d.hide = true);
-            tiles = res;
-            this.setState({ tiles: res.concat(missing) });
-        }).catch( (ex) =>{
-            console.log(`Error on API: ${ex}`);
-            this.setState({ tiles: INITIAL_TILES });
+        this.setState({ tiles: INITIAL_TILES }, () => {
+            ApiService.getWord().then( res => {
+                tiles = res.slice();
+                const missing = INITIAL_TILES.slice(res.length);
+                missing.forEach(d => d.hide = true);
+                this.setState({ tiles: res.concat(missing) });
+            }).catch( (ex) =>{
+                console.log(`Error on API: ${ex}`);
+                this.setState({ tiles: INITIAL_TILES });
+            });
         });
+    }
+
+    submit(){
+        let stateTiles = this.state.tiles.map( tile => {
+            if(tile.letter !== '*'){
+                if(tile.y === 0 && tile.id === tile.x){
+                    tile.classname = 'tile-good';
+                }else{
+                    tile.classname = 'tile-wrong';
+                }
+            }
+            return tile;
+        });
+        this.setState({ tiles: stateTiles });
     }
 
     renderTiles() {
@@ -124,6 +141,12 @@ class Scrabble extends Component {
               </div>
 
               <div className="controls">
+                <Toggle
+                  clickHandler={this.submit}
+                  text="Submit" icon="submit"
+                  active={true}
+                  large={true}
+                />
                 <Toggle
                   clickHandler={this.resetTiles}
                   text="Reset" icon="refresh"
@@ -175,7 +198,7 @@ class Tile extends Component {
 
     render() {
         const {
-            connectDropTarget, connectDragSource, isDragging, letter, x, y, hide
+            connectDropTarget, connectDragSource, isDragging, letter, x, y, hide, classname
         } = this.props;
 
         const styles = {
@@ -186,8 +209,11 @@ class Tile extends Component {
             display:  hide ? 'none' : 'block'
         };
 
+        let tileClassname = 'tile';
+        if(classname) tileClassname += ` ${classname}`;
+
         return connectDropTarget(connectDragSource(
-            <div className="tile" style={styles}>
+            <div className={tileClassname} style={styles}>
               <span className="tile-letter">{letter}</span>
             </div>
         ));

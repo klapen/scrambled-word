@@ -1,26 +1,28 @@
 import request from 'request';
 
-const apiKey = "TBJHATNG";
+const apiKey = 'TBJHATNG';
 const url = `https://random-word-api.herokuapp.com/word?key=${apiKey}&number=5`;
 
-function tilesObject(word){
+function tilesObject(word, readable, classname){
     const chars = word.toUpperCase().split('')
           .map( (c,i) => {
               return {id: i , letter: c }
           });;
-    let currentIndex = chars.length, temporaryValue, randomIndex;
+    if(!readable){
+        let currentIndex = chars.length, temporaryValue, randomIndex;
 
-    while (0 !== currentIndex) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
+        while (0 !== currentIndex) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
 
-        temporaryValue = chars[currentIndex];
-        chars[currentIndex] = chars[randomIndex];
-        chars[randomIndex] = temporaryValue;
+            temporaryValue = chars[currentIndex];
+            chars[currentIndex] = chars[randomIndex];
+            chars[randomIndex] = temporaryValue;
+        }
     }
 
     return chars.map( (c,i) => {
-        return {id: c.id , letter: c.letter, x: i, y:1 }
+        return {id: c.id , letter: c.letter, x: i, y:1, classname }
     });
 }
 
@@ -49,7 +51,7 @@ class ApiService {
                     return accept(tilesObject(words[0]));
                 }catch (ex){
                     console.log(`ApiService -> Error parsing to JSON: ${ex.trace}`);
-                    return accept(tilesObject('<sys error>'));
+                    return accept(tilesObject('<sys error>', true, 'tile-wrong'));
                 }
             });
         });

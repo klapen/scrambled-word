@@ -99,6 +99,14 @@ $fadedyellow: #BDA259;
     }
   }
 
+  .tile-wrong{
+      background: lightcoral;
+  }
+
+  .tile-good{
+      background: lightgreen;
+  }
+
   .controls {
     position: relative;
     margin: 1rem auto;
