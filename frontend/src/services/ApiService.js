@@ -1,6 +1,6 @@
 import request from 'request';
 
-const apiKey = 'PSSCKOXY';
+const apiKey = '7Z5LP05C';
 const url = `https://random-word-api.herokuapp.com/word?key=${apiKey}&number=5`;
 
 function tilesObject(word, readable, classname){

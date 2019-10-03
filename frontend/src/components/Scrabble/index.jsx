@@ -10,6 +10,7 @@ import Toggle               from '../Toggle';
 import Tile                 from '../Tile';
 import BoardSquare          from '../BoardSquare';
 import ApiService           from '../../services/ApiService';
+import StorageService       from '../../services/StorageService';
 
 const INITIAL_TILES = [
     { id: 1, letter: '*', x: 0, y: 1 },
@@ -34,7 +35,12 @@ let tiles = [];
 class Scrabble extends Component {
     constructor(props) {
         super(props);
-        this.state = { tiles: INITIAL_TILES };
+        this.state = {
+            tiles: INITIAL_TILES,
+            submit: false,
+            reset: false,
+            score: StorageService.getScore()
+        };
 
         this.updateDroppedTilePosition = this.updateDroppedTilePosition.bind(this);
         this.resetTiles = this.resetTiles.bind(this);
@@ -68,20 +74,23 @@ class Scrabble extends Component {
         this.setState({ tiles: INITIAL_TILES }, () => {
             ApiService.getWord().then( res => {
                 tiles = res.slice();
+                console.log('respuesta ', res.sort( (a,b) => a.id > b.id));
                 const missing = INITIAL_TILES.slice(res.length);
                 missing.forEach(d => d.hide = true);
-                this.setState({ tiles: res.concat(missing) });
+                this.setState({ tiles: res.concat(missing), submit: false, reset: false });
             }).catch( (ex) =>{
                 console.log(`Error on API: ${ex}`);
-                this.setState({ tiles: INITIAL_TILES });
+                this.setState({ tiles: INITIAL_TILES, submit: true, reset: true });
             });
         });
     }
 
     submit(){
+        let score = 0;
         let stateTiles = this.state.tiles.map( tile => {
             if(tile.letter !== '*'){
                 if(tile.y === 0 && tile.id === tile.x){
+                    score += 1;
                     tile.classname = 'tile-good';
                 }else{
                     tile.classname = 'tile-wrong';
@@ -89,7 +98,11 @@ class Scrabble extends Component {
             }
             return tile;
         });
-        this.setState({ tiles: stateTiles });
+
+        if(tiles.length === score){
+            score = StorageService.addToScore(1);
+        }
+        this.setState({ tiles: stateTiles, submit: true, reset: true, score });
     }
 
     renderTiles() {
@@ -125,6 +138,7 @@ class Scrabble extends Component {
     render() {
         return (
             <div id="scrabble">
+              <p>The score is: {this.state.score}</p>
               <div className="board-border">
                 <div key="scrabble-board" className="board">
                   <FlipMove duration={200} staggerDelayBy={150}>
@@ -138,14 +152,16 @@ class Scrabble extends Component {
                 <Toggle
                   clickHandler={this.submit}
                   text="Submit" icon="submit"
-                  active={true}
-                  large={true}
+                  active={false}
+                  large={false}
+                  disable={this.state.submit}
                 />
                 <Toggle
                   clickHandler={this.resetTiles}
                   text="Reset" icon="refresh"
                   active={true}
                   large={true}
+                  disable={this.state.reset}
                 />
                 <Toggle
                   clickHandler={this.newTiles}
