@@ -1,6 +1,6 @@
 import request from 'request';
 
-const url = 'http://localhost:3001/api/v1/random-word/';
+const url = 'http://localhost:3001/api/v1';
 
 function tilesObject(word, readable, classname){
     const chars = word.toUpperCase().split('')
@@ -29,7 +29,7 @@ class ApiService {
     getWord() {
         return new Promise( (accept, reject) => {
             const options = {
-                url,
+                url: `${url}/random-word`,
                 headers: {
                     'Content-type': 'application/json',
                 }
@@ -47,7 +47,11 @@ class ApiService {
                 }
                 
                 try{
-                    return accept(tilesObject(JSON.parse(body).word));
+                    const word = JSON.parse(body).word;
+                    return accept({
+                        word: tilesObject(word),
+                        audioUrl: `${url}/word-to-speech/${word}`
+                    });
                 }catch (ex){
                     console.log(`ApiService -> Error parsing to JSON: ${body} - ${ex}`);
                     return accept(tilesObject('<sys error>', true, 'tile-wrong'));

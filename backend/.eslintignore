@@ -2,3 +2,4 @@ node_modules/*
 plugins/*
 src/public/*
 views/*
+src/utils/voice-rss-tts.js

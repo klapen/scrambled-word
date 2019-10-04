@@ -1,6 +1,6 @@
 const randomWords = require('random-words');
 
-function get (req, res, next) {
+function get(req, res, next) {
   const word = randomWords({ exactly: 1, maxLength: 11 })[0];
 
   res.status(200).json({

@@ -39,7 +39,8 @@ class Scrabble extends Component {
             tiles: INITIAL_TILES,
             submit: false,
             reset: false,
-            score: StorageService.getScore()
+            score: StorageService.getScore(),
+            audioUrl: ''
         };
 
         this.updateDroppedTilePosition = this.updateDroppedTilePosition.bind(this);
@@ -74,11 +75,16 @@ class Scrabble extends Component {
         this.setState({ tiles: INITIAL_TILES }, () => {
             setTimeout( () => {
                 ApiService.getWord().then( res => {
-                    tiles = res.slice();
-                    console.log('respuesta ', res.sort( (a,b) => a.id > b.id));
-                    const missing = INITIAL_TILES.slice(res.length);
+                    tiles = res.word.slice();
+                    console.log('respuesta ', res.word.sort( (a,b) => a.id > b.id));
+                    const missing = INITIAL_TILES.slice(res.word.length);
                     missing.forEach(d => d.hide = true);
-                    this.setState({ tiles: res.concat(missing), submit: false, reset: false });
+                    this.setState({
+                        tiles: res.word.concat(missing),
+                        submit: false,
+                        reset: false,
+                        audioUrl: res.audioUrl || ''
+                    });
                 }).catch( (ex) =>{
                     console.log(`Error on API: ${ex}`);
                     this.setState({ tiles: INITIAL_TILES, submit: true, reset: true });
@@ -140,6 +146,9 @@ class Scrabble extends Component {
     }
 
     render() {
+        const audioStyle = {
+            display:  !this.state.audioUrl ? 'none' : ''
+        };
         return (
             <div id="scrabble">
               <p>The score is: {this.state.score}</p>
@@ -153,6 +162,11 @@ class Scrabble extends Component {
               </div>
 
               <div className="controls">
+                <audio controls
+                  src={this.state.audioUrl}
+                  type="audio/mpeg"
+                  style={audioStyle}
+                ></audio>
                 <Toggle
                   clickHandler={this.submit}
                   text="Submit" icon="submit"
