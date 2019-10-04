@@ -1,3 +1,5 @@
+import './Tile.scss';
+
 import PropTypes            from 'proptypes';
 import React, { Component } from 'react';
 

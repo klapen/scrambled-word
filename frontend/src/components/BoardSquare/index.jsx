@@ -1,3 +1,5 @@
+import './BoardSquare.scss';
+
 import React, { Component } from 'react';
 import classNames           from 'classnames';
 import { DropTarget }       from 'react-dnd';
