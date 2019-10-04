@@ -18,7 +18,8 @@ class BoardSquare extends Component {
     renderSquare() {
         const classes = classNames({
             'board-square': true,
-            'dragged-over': this.props.isOver
+            'dragged-over': this.props.isOver,
+            'board-square-letter': this.props.isBackColorWhite
         });
 
         return <div className={classes}></div>;

@@ -3,23 +3,22 @@ import classNames from 'classnames';
 
 const Toggle = ({clickHandler, text, icon, active, large, disable}) => {
     const buttonClass = classNames({
-        'button-toggle': true,
-        'no-icon': !icon,
-        active,
-        large,
+        'btn': true,
+        'btn-outline-secondary': true,
+        large        
     });
     const iconClass = `fa fa-fw fa-${icon}`;
 
     if(disable){
         return (
-            <button disabled className={buttonClass} onClick={clickHandler}>
+            <button type="button" disabled className={buttonClass} onClick={clickHandler}>
               <i className={iconClass} />
               {text}
             </button>
         );
     }else{
         return (
-            <button className={buttonClass} onClick={clickHandler}>
+            <button type="button" className={buttonClass} onClick={clickHandler}>
               <i className={iconClass} />
               {text}
             </button>

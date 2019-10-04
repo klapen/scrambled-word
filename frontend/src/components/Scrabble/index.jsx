@@ -40,7 +40,8 @@ class Scrabble extends Component {
             submit: false,
             reset: false,
             score: StorageService.getScore(),
-            audioUrl: ''
+            audioUrl: '',
+            answer: '***********'
         };
 
         this.updateDroppedTilePosition = this.updateDroppedTilePosition.bind(this);
@@ -72,7 +73,7 @@ class Scrabble extends Component {
     }
 
     newTiles(){
-        this.setState({ tiles: INITIAL_TILES }, () => {
+        this.setState({ tiles: INITIAL_TILES, answer: '*'.repeat(11) }, () => {
             setTimeout( () => {
                 ApiService.getWord().then( res => {
                     tiles = res.word.slice();
@@ -83,7 +84,8 @@ class Scrabble extends Component {
                         tiles: res.word.concat(missing),
                         submit: false,
                         reset: false,
-                        audioUrl: res.audioUrl || ''
+                        audioUrl: res.audioUrl || '',
+                        answer: '*'.repeat(tiles.length)
                     });
                 }).catch( (ex) =>{
                     console.log(`Error on API: ${ex}`);
@@ -112,7 +114,8 @@ class Scrabble extends Component {
         }else{
             score = StorageService.getScore();
         }
-        this.setState({ tiles: stateTiles, submit: true, reset: true, score });
+        const answer = tiles.sort( (a,b) => a.id > b.id).map( (c) => c.letter).join('');
+        this.setState({ tiles: stateTiles, submit: true, reset: true, score, answer });
     }
 
     renderTiles() {
@@ -139,6 +142,7 @@ class Scrabble extends Component {
                       x={index}
                       y={rowIndex}
                       onDrop={this.updateDroppedTilePosition}
+                      isBackColorWhite={rowIndex % 2}
                     />
                 );
             })
@@ -150,45 +154,60 @@ class Scrabble extends Component {
             display:  !this.state.audioUrl ? 'none' : ''
         };
         return (
-            <div id="scrabble">
-              <p>The score is: {this.state.score}</p>
-              <div className="board-border">
-                <div key="scrabble-board" className="board">
-                  <FlipMove duration={200} staggerDelayBy={150}>
-                    { this.renderTiles() }
-                  </FlipMove>
-                  { this.renderBoardSquares() }
+              <div id="scrabble" className="container-fluid">
+                <div className="row justify-content-md-center">
+                  <div className="col">
+                    <p>Answer: {this.state.answer}</p>
+                  </div>
+                  <div className="col">
+                    <p>Your score is: {this.state.score}</p>
+                  </div>
+                </div>
+                <div className="row justify-content-md-center">
+                  <div key="scrabble-board" className="board col">
+                    <FlipMove duration={200} staggerDelayBy={150}>
+                      { this.renderTiles() }
+                    </FlipMove>
+                    { this.renderBoardSquares() }
+                  </div>
+                </div>
+
+                <div className="row mt-2">
+                  <div className="col-5">
+                    <audio controls
+                           src={this.state.audioUrl}
+                           type="audio/mpeg"
+                           style={audioStyle}
+                    ></audio>
+                  </div>
+                  <div className="col-2">
+                    <Toggle
+                      clickHandler={this.submit}
+                      text="Submit" icon="submit"
+                      active={false}
+                      large={false}
+                      disable={this.state.submit}
+                    />
+                  </div>
+                  <div className="col-1">
+                    <Toggle
+                      clickHandler={this.resetTiles}
+                      text="Reset" icon="refresh"
+                      active={true}
+                      large={true}
+                      disable={this.state.reset}
+                    />
+                  </div>
+                  <div className="col-3">
+                    <Toggle
+                      clickHandler={this.newTiles}
+                      text="Next word" icon="next"
+                      active={true}
+                      large={true}
+                    />
+                  </div>
                 </div>
               </div>
-
-              <div className="controls">
-                <audio controls
-                  src={this.state.audioUrl}
-                  type="audio/mpeg"
-                  style={audioStyle}
-                ></audio>
-                <Toggle
-                  clickHandler={this.submit}
-                  text="Submit" icon="submit"
-                  active={false}
-                  large={false}
-                  disable={this.state.submit}
-                />
-                <Toggle
-                  clickHandler={this.resetTiles}
-                  text="Reset" icon="refresh"
-                  active={true}
-                  large={true}
-                  disable={this.state.reset}
-                />
-                <Toggle
-                  clickHandler={this.newTiles}
-                  text="Next word" icon="next"
-                  active={true}
-                  large={true}
-                />
-              </div>
-            </div>
         );
     }
 };
