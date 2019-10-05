@@ -154,60 +154,69 @@ class Scrabble extends Component {
             display:  !this.state.audioUrl ? 'none' : ''
         };
         return (
-              <div id="scrabble" className="container-fluid">
-                <div className="row justify-content-md-center">
-                  <div className="col">
-                    <p>Answer: {this.state.answer}</p>
-                  </div>
-                  <div className="col">
-                    <p>Your score is: {this.state.score}</p>
-                  </div>
-                </div>
-                <div className="row justify-content-md-center">
-                  <div key="scrabble-board" className="board col">
-                    <FlipMove duration={200} staggerDelayBy={150}>
-                      { this.renderTiles() }
-                    </FlipMove>
-                    { this.renderBoardSquares() }
-                  </div>
-                </div>
-
-                <div className="row mt-2">
-                  <div className="col-5">
-                    <audio controls
-                           src={this.state.audioUrl}
-                           type="audio/mpeg"
-                           style={audioStyle}
-                    ></audio>
-                  </div>
-                  <div className="col-2">
-                    <Toggle
-                      clickHandler={this.submit}
-                      text="Submit" icon="submit"
-                      active={false}
-                      large={false}
-                      disable={this.state.submit}
-                    />
-                  </div>
-                  <div className="col-1">
-                    <Toggle
-                      clickHandler={this.resetTiles}
-                      text="Reset" icon="refresh"
-                      active={true}
-                      large={true}
-                      disable={this.state.reset}
-                    />
-                  </div>
-                  <div className="col-3">
-                    <Toggle
-                      clickHandler={this.newTiles}
-                      text="Next word" icon="next"
-                      active={true}
-                      large={true}
-                    />
-                  </div>
+            <div id="scrabble">
+              <div className="row mt-2 justify-content-md-center">
+                <div id="instructions" className="col-8">
+                  <p><strong>Instructions:</strong> The audio will present you with the English word pronunciation to guess. In the second row, you will find a pool of scrambled from that word's spelling. Just move each letter to the first row in the correct place. If you want to start again, just click on the Reset button. After you finish, you can submit your answer to check the spelling. Just keep in mind that all the letters in the grey row will be consider as wrong. To get a new word, just click the Next word button. Enjoy playing!!</p>
                 </div>
               </div>
+              <div className="row mt-2 align-items-center">
+                <div className="col col-lg-7">
+                  <p>Answer: {this.state.answer}</p>
+                </div>
+                <div className="col col-lg-2">
+                  <p>Your score is: <strong>{this.state.score}</strong></p>
+                </div>
+              </div>
+              <div className="row justify-content-md-center">
+                <div key="scrabble-board" className="board">
+                  <FlipMove duration={200} staggerDelayBy={150}>
+                    { this.renderTiles() }
+                  </FlipMove>
+                  { this.renderBoardSquares() }
+                </div>
+              </div>
+              
+              <div className="row mt-2 align-items-center">
+                <div className="col col-lg-6">
+                  <p className="float-right">Play the audio to listen to the word</p>
+                </div>
+                <div className="col col-lg-2">
+                  <audio className="float-left" controls
+                         src={this.state.audioUrl}
+                         type="audio/mpeg"
+                  ></audio>
+                </div>
+              </div>
+              <div className="row mt-2 justify-content-md-center">
+                <div className="col-2">
+                  <Toggle
+                    clickHandler={this.submit}
+                    text="Submit" icon="submit"
+                    active={false}
+                    large={false}
+                    disable={this.state.submit}
+                  />
+                </div>
+                <div className="col-1">
+                  <Toggle
+                    clickHandler={this.resetTiles}
+                    text="Reset" icon="refresh"
+                    active={true}
+                    large={true}
+                    disable={this.state.reset}
+                  />
+                </div>
+                <div className="col-3">
+                  <Toggle
+                    clickHandler={this.newTiles}
+                    text="Next word" icon="next"
+                    active={true}
+                    large={true}
+                  />
+                </div>
+              </div>
+            </div>
         );
     }
 };

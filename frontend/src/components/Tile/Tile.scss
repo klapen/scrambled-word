@@ -2,8 +2,10 @@ $tile-size   : 56px;
 $darkgray    : #333636;
 $fadedyellow : #BDA259;
 $yellow      : #FFD959;
-$wrong       : lightcoral;
+$wrong       : #F6A794;
+$fadewrong   : lightcoral;
 $good        : lightgreen;
+$fadegood    : #20B2AA;
 
 .tile {
     position: absolute;
@@ -53,8 +55,24 @@ $good        : lightgreen;
 
   .tile-wrong{
       background: $wrong;
+      box-shadow:
+          0.5px 0.5px 0px $fadewrong,
+          1px 1px 0px $fadewrong,
+          1.5px 1.5px 0px $fadewrong,
+          2px 2px 0px $fadewrong,
+          2.5px 2.5px 0px $fadewrong,
+          3px 3px 0px $fadewrong,
+      ;
   }
 
   .tile-good{
       background: $good;
+      box-shadow:
+          0.5px 0.5px 0px $fadegood,
+          1px 1px 0px $fadegood,
+          1.5px 1.5px 0px $fadegood,
+          2px 2px 0px $fadegood,
+          2.5px 2.5px 0px $fadegood,
+          3px 3px 0px $fadegood,
+      ;
   }
