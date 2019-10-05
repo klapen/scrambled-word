@@ -13,7 +13,7 @@ import ApiService           from '../../services/ApiService';
 import StorageService       from '../../services/StorageService';
 
 const INITIAL_TILES = [
-    { id: 1, letter: '*', x: 0, y: 1 },
+    { id: 0, letter: '*', x: 0, y: 1 },
     { id: 1, letter: '*', x: 1, y: 1 },
     { id: 2, letter: '*', x: 2, y: 1 },
     { id: 3, letter: '*', x: 3, y: 1 },
@@ -99,7 +99,7 @@ class Scrabble extends Component {
         let score = 0;
         let stateTiles = this.state.tiles.map( tile => {
             if(tile.letter !== '*'){
-                if(tile.y === 0 && tile.id === tile.x){
+                if(tile.y === 0 && tile.positions.indexOf(tile.x) >= 0){
                     score += 1;
                     tile.classname = 'tile-good';
                 }else{
@@ -150,9 +150,6 @@ class Scrabble extends Component {
     }
 
     render() {
-        const audioStyle = {
-            display:  !this.state.audioUrl ? 'none' : ''
-        };
         return (
             <div id="scrabble">
               <div className="row mt-2 justify-content-md-center">

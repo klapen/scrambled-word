@@ -21,7 +21,8 @@ function tilesObject(word, readable, classname){
     }
 
     return chars.map( (c,i) => {
-        return {id: c.id , letter: c.letter, x: i, y:1, classname }
+        const positions = chars.map( (d,i) => d.letter === c.letter ? d.id : -1).filter( i => i !== -1);
+        return {id: c.id , letter: c.letter, x: i, y:1, classname, positions }
     });
 }
 
