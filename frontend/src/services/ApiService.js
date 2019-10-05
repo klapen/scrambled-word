@@ -1,6 +1,6 @@
 import request from 'request';
 
-const url = 'http://localhost:3001/api/v1';
+const url = process.env.REACT_APP_API_SERVICE_URL || 'http://localhost:3001/api/v1';
 
 function tilesObject(word, readable, classname){
     const chars = word.toUpperCase().split('')
